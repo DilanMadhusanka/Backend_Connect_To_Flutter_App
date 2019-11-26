@@ -3,17 +3,26 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-List data;
+
 
 void main() async {
-  data = await getData();
+  
   runApp(new MaterialApp(
     title: 'Spring',
     home: new Home(),
   ));
 }
 
-class Home extends StatelessWidget {
+
+
+class Home extends StatefulWidget {
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  
+  List data;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,8 +32,37 @@ class Home extends StatelessWidget {
       body: new Container(
         child: new ListView(
           children: <Widget>[
-            new Container(
-              height: 500,
+            Container(
+              child: displayResult(),
+            ),
+            new RaisedButton(
+              child: new Text('Ok'),
+              onPressed: () {
+                getData();
+              },
+            )
+          ],
+        ),
+      ),
+    );
+  }
+  
+Future<List> getData() async {
+  String apiUrl = "http://10.0.2.2:8080/contact";
+  http.Response response = await http.get(apiUrl);
+  setState(() {
+    data =  json.decode(response.body);
+  });
+  return json.decode(response.body);
+
+}
+Widget displayResult() {
+  
+  if(data == null){
+    return Container();
+  }else{
+    return Container(
+          height: MediaQuery.of(context).size.height -160,
               child: new ListView.builder(
                 itemCount: data.length,
                 padding: const EdgeInsets.all(15.0),
@@ -36,24 +74,9 @@ class Home extends StatelessWidget {
                   );
                 },
               ),
-              // child: Text("data"),
-            ),
-            new RaisedButton(
-              onPressed: () {
-                debugPrint("${data[1]}");
-              },
-            )
-          ],
-        ),
-      ),
-    );
+        );
   }
-}
-
-Future<List> getData() async {
-  String apiUrl = "http://10.0.2.2:8080/contact";
-  http.Response response = await http.get(apiUrl);
   
-  return json.decode(response.body);
-
 }
+}
+
